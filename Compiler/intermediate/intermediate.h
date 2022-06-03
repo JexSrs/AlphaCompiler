@@ -8,7 +8,11 @@
 #include <string.h>
 #include <stdlib.h>
 
-extern int numberOfDigits(int tempcounter);
+#define EXPAND_SIZE 1024
+#define CURR_SIZE (total * sizeof(struct Quad))
+#define NEW_SIZE (EXPAND_SIZE * sizeof(struct Quad) + CURR_SIZE)
+
+extern int numberOfDigits(int num);
 
 extern char *giveName(char *prefix, int num);
 
@@ -108,11 +112,6 @@ struct BCList{
 
 extern struct Quad *quads;
 extern unsigned int functionLocalOffset;
-
-#define EXPAND_SIZE 1024
-#define CURR_SIZE 	(total * sizeof(struct Quad))
-#define NEW_SIZE 	(EXPAND_SIZE * sizeof(struct Quad) + CURR_SIZE)
-
 
 void emit (
         enum IOPCode op,

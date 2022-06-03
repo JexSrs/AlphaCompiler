@@ -1,6 +1,6 @@
 %{
 #include "../Compiler/bison/bison.h"
-#include "../Compiler/intermediate/intermediate.h"
+#include "../Compiler/targetCode/targetCode.h"
 
 #include "stdio.h"
 #include "stdlib.h"
@@ -844,7 +844,13 @@ call: 		call openPar elist closePar							{
 			|lvalue callsuffix									{
                                                                     print("call lvalue callsuffix");
 
-                                                                    if(existsLibFunc((char*) $1->sym->value.funcVal->name))
+																	char *name = NULL;
+                                                            		if($1->sym->what == function)
+                                                            			name = (char*) $1->sym->value.funcVal->name;
+																	else
+																		name = (char*) $1->sym->value.varVal->name;
+
+                                                                    if(existsLibFunc(name))
 																		$1->type = libraryfunc_e;
 
 																	if($2->method) {
@@ -978,6 +984,7 @@ objectdef:	openBracket elist closeBracket			{
 
 														struct expr *tmp = $2;
 														int i = 0;
+
 														while(tmp != NULL) {
 															emit(tablesetelem, t, newExprConstNumber(i++), tmp, nextQuadLabel(), getCurrentLine());
 															tmp = tmp->next;
@@ -1439,6 +1446,7 @@ returnstmt:	RETURN semicolon		{
 										}
 
 										emit(ret, NULL, NULL, NULL, nextQuadLabel(), getCurrentLine());
+										emit(jump, NULL, NULL, newExprConstNumber(nextQuadLabel() + 2), nextQuadLabel(), getCurrentLine());
 
 										print("returnstmt RETURN;");
 									}
@@ -1462,6 +1470,7 @@ returnstmt:	RETURN semicolon		{
 										}
 
 										emit(ret, NULL, NULL, $<exprValue>2, nextQuadLabel(), getCurrentLine());
+										emit(jump, NULL, NULL, newExprConstNumber(nextQuadLabel() + 2), nextQuadLabel(), getCurrentLine());
 										$<exprValue>$ = $2;
 
 										print("returnstmt RETURN expr;");
@@ -1479,7 +1488,7 @@ int yyerror(char* yaccProvidedMessage){
 }
 
 char *genName() {
-	return giveName("$$func_def_", noNameFunctionNum);
+	return giveName("$$func_def_", noNameFunctionNum++);
 }
 
 void scopeOps(enum ScopeAction action) {
@@ -1527,22 +1536,25 @@ char* getStringValueQuad(struct expr *e, int isResult) {
 }
 
 void printAllQuads() {
+	if(encounteredError == 1) {
+		print("Finsihed with errors, no quad file will be generated");
+		return;
+	}
+
 	FILE *file = fopen("quads.txt", "w");
 	if(!file) {
 		printf("Cannot open quads.txt\n");
 		return;
 	}
 
-	if(encounteredError == 0) {
-		fprintf(file,"\n%-s%-16s%-15s%-15s%-s\n",
-		 			"#|\t", "OP|", "ARG1|", "ARG2|", "LBL|");
-		fprintf(file, "----------------------------------------------------------\n");
+	fprintf(file,"\n%-s%-16s%-15s%-15s%-s\n",
+				"#|\t", "OP|", "ARG1|", "ARG2|", "LBL|");
+	fprintf(file, "----------------------------------------------------------\n");
 
-		for(int i = 0; i < nextQuadLabel(); i++) {
-			fprintf(file, "%-d%-s%-12s\t", quads[i].label, ":\t", opcodeToString[quads[i].op]);
-			fprintf(file, "%-15s%-15s%-15s\n",
-						getStringValueQuad(quads[i].arg1,0), getStringValueQuad(quads[i].arg2, 0), getStringValueQuad(quads[i].result, 1));
-		}
+	for(int i = 0; i < nextQuadLabel(); i++) {
+		fprintf(file, "%-d%-s%-12s\t", quads[i].label, ":\t", opcodeToString[quads[i].op]);
+		fprintf(file, "%-15s%-15s%-15s\n",
+					getStringValueQuad(quads[i].arg1,0), getStringValueQuad(quads[i].arg2, 0), getStringValueQuad(quads[i].result, 1));
 	}
 
 	fclose(file);
@@ -1550,6 +1562,15 @@ void printAllQuads() {
 
 void print(char *message) {
 	printf("Message (line %d): %s\n", getCurrentLine(), message);
+}
+
+void makeBinaryFile(char *name) {
+	if(encounteredError == 1) {
+		print("Finsihed with errors, no binary file will be generated");
+		return;
+	}
+
+	createBinaryFile(name);
 }
 
 int main(int argc, char **argv) {
@@ -1579,8 +1600,11 @@ int main(int argc, char **argv) {
 
 	yyparse();
 
-	//emit(no_op, NULL, NULL, NULL, nextQuadLabel(), getCurrentLine());
+	emit(no_op, NULL, NULL, NULL, nextQuadLabel(), getCurrentLine());
 	printAllQuads();
+
+	generateTcode(nextQuadLabel());
+	makeBinaryFile("a.bin");
 
     if (argc > 1) fclose(f_in);
     if (argc > 2) fclose(f_out);

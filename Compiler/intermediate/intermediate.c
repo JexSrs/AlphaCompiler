@@ -57,7 +57,7 @@ void emit(enum IOPCode op, struct expr *arg1, struct expr *arg2, struct expr *re
 }
 
 char *newTempName() {
-    return giveName("_t", tmpCounter);
+    return giveName("_t", tmpCounter++);
 }
 
 struct SymbolTable *newTmp(int scope) {
@@ -230,7 +230,7 @@ struct expr *emitIfTableItem(struct expr *e, int quadNo, int line, int scope) {
 
     struct expr *result = newExpr(var_e);
     result->sym = newTmp(scope);
-    emit(tablesetelem, e, e->index, result, quadNo, line);
+    emit(tablegetelem, e, e->index, result, quadNo, line);
 
     return result;
 }
@@ -246,15 +246,17 @@ struct expr *memberItem(struct expr *lvalue, int quadNo, int line, int scope, ch
 
 struct expr *makeCall(struct expr *lvalue, struct expr *elist, int scope, int line) {
     struct expr *func = emitIfTableItem(lvalue, nextQuadLabel(), line, scope);
-    struct expr *tmp = elist;
 
-    while (tmp->next != NULL)
-        tmp = tmp->next;
+    if(elist != NULL) {
+        struct expr *tmp = elist;
+        while (tmp->next != NULL)
+            tmp = tmp->next;
 
-    if (elist->voidParam == 0) {
-        while (tmp != NULL) {
-            emit(param, tmp, NULL, func, nextQuadLabel(), line);
-            tmp = tmp->prev;
+        if (elist->voidParam == 0) {
+            while (tmp != NULL) {
+                emit(param, tmp, NULL, func, nextQuadLabel(), line);
+                tmp = tmp->prev;
+            }
         }
     }
 

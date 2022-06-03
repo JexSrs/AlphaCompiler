@@ -1,0 +1,12 @@
+
+#|	OP|             ARG1|          ARG2|          LBL|
+----------------------------------------------------------
+0:	tablegetelem	t              x              _t1            
+1:	assign      	_t1                           _t0            
+2:	sub         	_t1            1              _t1            
+3:	tablesetelem	t              x              _t1            
+4:	tablegetelem	t              3              _t2            
+5:	add         	_t2            1              _t2            
+6:	tablesetelem	t              3              _t2            
+7:	sub         	_t0            _t2            _t3            
+8:	no_op       	                                             

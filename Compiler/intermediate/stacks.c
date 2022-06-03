@@ -28,7 +28,7 @@ int pop() {
     tmp->next = NULL;
 
     // TODO - Throws error at CSD machines
-    free(tmp);
+//    free(tmp);
 
     return i;
 }
@@ -57,7 +57,7 @@ int popLoopCounter() {
     tmp->next = NULL;
 
     // TODO - Throws error at CSD machines
-    free(tmp);
+//    free(tmp);
 
     return i;
 }
@@ -86,7 +86,7 @@ int popFuncJump() {
     tmp->next = NULL;
 
     // TODO - Throws error at CSD machines
-    free(tmp);
+//    free(tmp);
 
     return i;
 }

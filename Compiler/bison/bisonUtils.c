@@ -463,7 +463,6 @@ int existsLibFunc(char *name) {
 
         symt = symt->nextScope;
     }
-
     return 0;
 }
 
@@ -661,9 +660,7 @@ struct SymbolTable *findTemp(char *name, int scope) {
 }
 
 unsigned int totalGlobals() {
-
     unsigned int total = 0;
-
     int i = 0;
 
     for (i = 0; i < HASH_SIZE; i++) {
