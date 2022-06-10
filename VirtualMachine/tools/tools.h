@@ -9,54 +9,49 @@
 
 #include "../main.h"
 
-#define ENOUGH_NUM(n) (int)((ceil(log10(n)) + 1) * sizeof(char))
+void printError(char *message, char *arg1, char *arg2);
 
-typedef void (*memclear_func_t)(struct AvmMemCell *);
-typedef char *(*tostring_func_t)(struct AvmMemCell *);
-typedef void (*library_func_t)(void);
-typedef double (*arithmetic_func_t)(double x, double y);
-typedef unsigned char (*cmp_func_t)(double x, double y);
-typedef unsigned char (*tobool_func_t)(struct AvmMemCell *);
-typedef void (*execute_func_t)(struct Instruction *);
+typedef char *(*toStringFunction)(struct AvmMemCell *);
+typedef void (*libraryFunction)(void);
+typedef double (*arithmeticFunction)(double x, double y);
+typedef unsigned char (*comparisonFunction)(double x, double y);
+typedef unsigned char (*toBoolFunction)(struct AvmMemCell *);
+typedef void (*execFunction)(struct Instruction *);
 
 // memoryManager.c
-struct AvmTable *avm_tableNew();
-struct AvmMemCell *avm_tablegetelem(struct AvmTable *table, struct AvmMemCell *index);
-void avm_tablesetelem(struct AvmTable *table, struct AvmMemCell *index, struct AvmMemCell *value);
-void avm_tableIncRefCounter(struct AvmTable *t);
-void avm_memcellClear(struct AvmMemCell *m);
-void avm_assign(struct AvmMemCell *lv, struct AvmMemCell *rv);
+struct AvmTable *newTable();
+struct AvmMemCell *tableGetElem(struct AvmTable *t, struct AvmMemCell *i);
+void tableSetElem(struct AvmTable *t, struct AvmMemCell *i, struct AvmMemCell *v);
+void tableIncRefCounter(struct AvmTable *t);
 
-void avm_warning(char *msg1, char *id, char *msg2);
-void avm_error(char *msg1, char *id, char *msg2);
+void memClear(struct AvmMemCell *m);
+void assign_(struct AvmMemCell *lv, struct AvmMemCell *rv);
 
-char *avm_tostring(struct AvmMemCell *m);
+char *toString(struct AvmMemCell *m);
+unsigned char toBool(struct AvmMemCell *m);
 
-void avm_callLibFunc(char *libfuncName);
-void avm_callSaveEnvironment();
+void callLibraryFunction(char *name);
+void callSaveEnvironment();
 
-void avm_dec_top();
+void decreaseTop();
 
-struct UserFunc *avm_getfuncinfo(unsigned int address);
-unsigned int avm_get_envvalue(unsigned int i);
+struct UserFunc *getFuncInfo(unsigned int address);
+unsigned int getEnvValue(unsigned int i);
 
-unsigned int avm_totalactuals(void);
+unsigned int totalActuals_(void);
 
-void execute_arithmetic(struct Instruction* instr);
-void execute_comparison(struct Instruction* instr);
+void doArithmeticInstr(struct Instruction* instr);
+void doComparisonInstr(struct Instruction* instr);
 
-unsigned char avm_tobool(struct AvmMemCell *m);
+struct AvmMemCell* parseOperand(struct VmArg* arg, struct AvmMemCell* reg);
 
-struct AvmMemCell* avm_translate_operand(struct VmArg* arg, struct AvmMemCell* reg);
-
-void avm_initialize(void);
+void initialize(void);
 
 // binaryDecoder.c
-struct DataTables* decode(int visualize, char* name);
+struct BinaryData* binaryDecode(char* name);
 
 // dispatcher.c
-void execute_cycle();
-
-void execute_funcexit(struct Instruction *instr);
+void startCycle();
+void functionExit(struct Instruction *i);
 
 #endif //PROJECT_TOOLS_H

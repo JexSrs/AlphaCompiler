@@ -1,17 +1,15 @@
 #ifndef PROJECT_MAIN_H
 #define PROJECT_MAIN_H
 
-#define AVM_STACKSIZE           4096
+#define AVM_STACK_SIZE           4096
 
-#define AVM_NUMACTUALS_OFFSET   +4
-#define AVM_SAVEDPC_OFFSET      +3
-#define AVM_SAVEDTOP_OFFSET     +2
-#define AVM_SAVEDTOPSP_OFFSET   +1
-#define AVM_STACKENV_SIZE       4
+#define AVM_TABLE_HASH_SIZE      211
 
-#define  AVM_MAX_INSTRUCTIONS 	20
-
-#define AVM_TABLE_HASHSIZE      211
+#define AVM_STACK_ENV_SIZE       4
+#define AVM_NUM_ACTUALS_OFFSET   4
+#define AVM_SAVE_DPC_OFFSET      3
+#define AVM_SAVED_TOP_OFFSET     2
+#define AVM_SAVED_TOPSP_OFFSET   1
 
 struct InstructionToBinary {
     int instrOpcode;
@@ -30,18 +28,18 @@ struct InstructionToBinary {
 struct UserFunc {
     unsigned int address;
     unsigned int localSize;
-    unsigned int totalargs;
+    unsigned int totalArgs;
     char *id;
 };
 
 enum VmOpcode {
-    assign_v,		add_v,				sub_v,
-    mul_v,			div_v,				mod_v,
-    jump_v,			jeq_v,				jne_v,
-    jle_v,			jge_v,				jlt_v,
-    jgt_v,			call_v,				pusharg_v,
-    funcenter_v,	funcexit_v,			newtable_v,
-    tablegetelem_v,	tablesetelem_v, 	nop_v
+    assign_v, add_v, sub_v,
+    mul_v, div_v, mod_v,
+    jump_v, jeq_v, jne_v,
+    jle_v, jge_v, jlt_v,
+    jgt_v, call_v, pusharg_v,
+    funcenter_v, funcexit_v, newtable_v,
+    tablegetelem_v, tablesetelem_v, nop_v
 };
 
 enum VmArg_t {
@@ -67,13 +65,14 @@ struct VmArg {
 
 struct Instruction {
     enum VmOpcode opcode;
+    unsigned int srcLine;
+
     struct VmArg result;
     struct VmArg arg1;
     struct VmArg arg2;
-    unsigned int srcLine;
 };
 
-struct DataTables {
+struct BinaryData {
     double *numConstsTable;
     unsigned int totalNumConsts;
 
@@ -124,23 +123,23 @@ struct AvmTableBucket {
 
 struct AvmTable {
     unsigned int refCounter;
-    struct AvmTableBucket *strIndexed[AVM_TABLE_HASHSIZE];
-    struct AvmTableBucket *numIndexed[AVM_TABLE_HASHSIZE];
+    struct AvmTableBucket *strIndexed[AVM_TABLE_HASH_SIZE];
+    struct AvmTableBucket *numIndexed[AVM_TABLE_HASH_SIZE];
     unsigned int total;
 };
 
-extern struct AvmMemCell ax, bx;
-extern struct AvmMemCell retval;
+extern struct AvmMemCell amc1;
+extern struct AvmMemCell amc2;
+extern struct AvmMemCell returnValue;
 extern unsigned int top;
-extern unsigned int topsp;
+extern unsigned int top_sp;
 
-extern unsigned char executionFinished;
+extern unsigned char running;
 extern unsigned int pc;
 
-extern struct DataTables* tables;
+extern struct BinaryData* binaryData;
 
 extern unsigned int totalActuals;
-extern struct AvmMemCell stack[AVM_STACKSIZE];
-
+extern struct AvmMemCell stack[AVM_STACK_SIZE];
 
 #endif //PROJECT_MAIN_H

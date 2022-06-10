@@ -32,11 +32,9 @@ unsigned int totalUserFuncs = 0;
 struct Instruction *instructions = NULL;
 unsigned int totalInstructions = 0;
 
-static void EXPANDER(enum Typer type) {
+static void expandType(enum Typer type) {
     switch (type) {
-        case NUMBER_T:
-            assert(totalNumConsts == totalNumSize);
-
+        case NUMBER_T: {
             double *a = malloc(NEW_SIZE_NUM);
             if (numConsts) {
                 memcpy(a, numConsts, CURR_SIZE_NUM);
@@ -44,10 +42,9 @@ static void EXPANDER(enum Typer type) {
             }
             numConsts = a;
             totalNumSize += EXPAND_SIZE;
+        }
             break;
-        case STRINGER_T:
-            assert(totalStringConsts == totalStringSize);
-
+        case STRINGER_T: {
             char **a1 = malloc(NEW_SIZE_STR);
             if (stringConsts) {
                 memcpy(a1, stringConsts, CURR_SIZE_STR);
@@ -55,10 +52,9 @@ static void EXPANDER(enum Typer type) {
             }
             stringConsts = a1;
             totalStringSize += EXPAND_SIZE;
+        }
             break;
-        case LIBFUNCER_T:
-            assert(totalNamedLibFuncs == totalLibFuncSize);
-
+        case LIBFUNCER_T: {
             char **a2 = malloc(NEW_SIZE_LIBFUNC);
             if (namedLibFuncs) {
                 memcpy(a2, namedLibFuncs, CURR_SIZE_LIBFUNC);
@@ -66,10 +62,9 @@ static void EXPANDER(enum Typer type) {
             }
             namedLibFuncs = a2;
             totalLibFuncSize += EXPAND_SIZE;
+        }
             break;
-        case USERFUNCER_T:
-            assert(totalUserFuncs == totalUserFuncSize);
-
+        case USERFUNCER_T: {
             struct UserFunc *a3 = malloc(NEW_SIZE_USERFUNC);
             if (userFuncs) {
                 memcpy(a3, userFuncs, CURR_SIZE_USERFUNC);
@@ -77,31 +72,31 @@ static void EXPANDER(enum Typer type) {
             }
             userFuncs = a3;
             totalUserFuncSize += EXPAND_SIZE;
+        }
             break;
-        case INSTRUCTER_T:
-            assert(totalInstructions == totalInstrSize);
-
-            struct Instruction* a4 = malloc (NEW_SIZE_INSTR_ARR);
-            if(instructions){
+        case INSTRUCTER_T: {
+            struct Instruction *a4 = malloc(NEW_SIZE_INSTR_ARR);
+            if (instructions) {
                 memcpy(a4, instructions, CURR_SIZE_INSTR_ARR);
                 free(instructions);
             }
             instructions = a4;
             totalInstrSize += EXPAND_SIZE;
+        }
             break;
         default:
             assert(0);
     }
 }
 
-int INSERTER_NUM(double val) {
+int insertNumber(double val) {
     for (int i = 0; i < totalNumConsts; i++) {
         if(numConsts[i] == val)
             return i;
     }
 
     if(totalNumConsts == totalNumSize)
-        EXPANDER(NUMBER_T);
+        expandType(NUMBER_T);
 
     int pos = (int) totalNumConsts;
     numConsts[totalNumConsts++] = val;
@@ -109,14 +104,14 @@ int INSERTER_NUM(double val) {
     return pos;
 }
 
-int INSERTER_STRING(char *val) {
+int insertString(char *val) {
     for (int i = 0; i < totalStringConsts; i++) {
         if(strcmp(stringConsts[i], val) == 0)
             return i;
     }
 
     if(totalStringConsts == totalStringSize)
-        EXPANDER(STRINGER_T);
+        expandType(STRINGER_T);
 
     int pos = (int) totalStringConsts;
     stringConsts[totalStringConsts++] = val;
@@ -124,14 +119,14 @@ int INSERTER_STRING(char *val) {
     return pos;
 }
 
-int INSERTER_LIBFUNC(char *val) {
+int insertLibraryDunc(char *val) {
     for (int i = 0; i < totalNamedLibFuncs; i++) {
         if(strcmp(namedLibFuncs[i], val) == 0)
             return i;
     }
 
     if(totalNamedLibFuncs == totalLibFuncSize)
-        EXPANDER(LIBFUNCER_T);
+        expandType(LIBFUNCER_T);
 
     int pos = (int) totalNamedLibFuncs;
     namedLibFuncs[totalNamedLibFuncs++] = val;
@@ -139,14 +134,14 @@ int INSERTER_LIBFUNC(char *val) {
     return pos;
 }
 
-int INSERTER_USERFUNC(unsigned int address, unsigned int localSize, unsigned int totalargs, char *id) {
+int insertUserFunc(unsigned int address, unsigned int localSize, unsigned int totalargs, char *id) {
     for (int i = 0; i < totalUserFuncs; i++) {
         if(strcmp(userFuncs[i].id , id) == 0 && userFuncs[i].address == address)
             return i;
     }
 
     if(totalUserFuncs == totalUserFuncSize)
-        EXPANDER(USERFUNCER_T);
+        expandType(USERFUNCER_T);
 
     int pos = (int) totalUserFuncs;
 
@@ -154,14 +149,14 @@ int INSERTER_USERFUNC(unsigned int address, unsigned int localSize, unsigned int
     new->id = id;
     new->address = address;
     new->localSize = localSize;
-    new->totalargs = totalargs;
+    new->totalArgs = totalargs;
 
     return pos;
 }
 
 int emitInstr(struct Instruction t) {
     if(totalInstructions == totalInstrSize)
-        EXPANDER(INSTRUCTER_T);
+        expandType(INSTRUCTER_T);
 
     struct Instruction *new = instructions + totalInstructions++;
     new->opcode = t.opcode;

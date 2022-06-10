@@ -53,7 +53,7 @@ void createBinaryFile(char *name) {
         fwrite(&i, sizeof(int), 1, fp);
         fwrite(&userFuncs[i].address, sizeof(int), 1, fp);
         fwrite(&userFuncs[i].localSize, sizeof(int), 1, fp);
-        fwrite(&userFuncs[i].totalargs, sizeof(int), 1, fp);
+        fwrite(&userFuncs[i].totalArgs, sizeof(int), 1, fp);
         fwrite(value, sizeof(char) * currStringSize, 1, fp);
 
         value = NULL;

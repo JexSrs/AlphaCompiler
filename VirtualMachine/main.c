@@ -1,37 +1,29 @@
 #include "tools/tools.h"
 
-struct AvmMemCell ax, bx;
-struct AvmMemCell retval;
+struct AvmMemCell amc1;
+struct AvmMemCell amc2;
+struct AvmMemCell returnValue;
 unsigned int top;
-unsigned int topsp; // Not initialized
+unsigned int top_sp; // Not initialized
 
-unsigned char executionFinished;
+unsigned char running;
 unsigned int pc;
 
-struct DataTables* tables;
+struct BinaryData* binaryData;
 
 unsigned int totalActuals; // Not initialized
-struct AvmMemCell stack[AVM_STACKSIZE];
+struct AvmMemCell stack[AVM_STACK_SIZE];
 
 int main(int argc, char **argv) {
     char *name = argv[1];
 
-    // You can see in a visualized way all the data stored in the executable when the VM is running it.
-    int visualize = 0;
-
-    if(argc > 2 && !strcmp(argv[2], "--visualize"))
-        visualize = 1;
-
-    tables = decode(visualize, name);
-
-    executionFinished = 0;
+    binaryData = binaryDecode(name);
+    running = 1;
     pc = 0;
-    top = AVM_STACKSIZE - 1 - tables->totalGlobals;
+    top = AVM_STACK_SIZE - 1 - binaryData->totalGlobals;
 
-    avm_initialize();
+    initialize();
 
-    while(executionFinished == 0) {
-//         printf("Executing instruction %d\n", pc);
-        execute_cycle();
-    }
+    while(running)
+        startCycle();
 }

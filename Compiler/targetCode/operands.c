@@ -16,6 +16,7 @@ static void make_operand(struct expr *e, struct VmArg *arg) {
     if (e == NULL) {
         arg->val = -1;
         arg->type = -1;
+        return;
     }
 
     switch (e->type) {
@@ -24,26 +25,15 @@ static void make_operand(struct expr *e, struct VmArg *arg) {
         case arithexpr_e:
         case boolexpr_e:
         case assignexpr_e:
-        case newtable_e: {
-            assert(e->sym);
-            arg->val = e->sym->offset;
-
-            switch (e->sym->scopeSpace) {
-                case PROGRAM_VAR:
-                    arg->type = global_a;
-                    break;
-                case FUNC_LOCAL:
-                    arg->type = local_a;
-                    break;
-                case FORMAL_ARG:
-                    arg->type = formal_a;
-                    break;
-                default:
-                    assert(0);
-            }
+        case newtable_e:
+            if(e->sym->scopeSpace == PROGRAM_VAR)
+                arg->type = global_a;
+            else if(e->sym->scopeSpace == FUNC_LOCAL)
+                arg->type = local_a;
+            else if(e->sym->scopeSpace == FORMAL_ARG)
+                arg->type = formal_a;
             break;
-        }
-        case constbool_e: {
+        case constbool_e:
             if (e->boolConst == '0')
                 arg->val = 0;
             else
@@ -51,45 +41,26 @@ static void make_operand(struct expr *e, struct VmArg *arg) {
 
             arg->type = bool_a;
             break;
-        }
-        case conststring_e: {
-            arg->val = INSERTER_STRING(e->strConst);
+        case conststring_e:
+            arg->val = insertString(e->strConst);
             arg->type = string_a;
             break;
-        }
-        case constnum_e: {
-            arg->val = INSERTER_NUM(e->numConst);
+        case constnum_e:
+            arg->val = insertNumber(e->numConst);
             arg->type = number_a;
             break;
-        }
-        case nil_e: {
-            arg->type = nil_a;
-            break;
-        }
-        case programfunc_e: {
+        case nil_e: arg->type = nil_a; break;
+        case programfunc_e:
             arg->type = userfunc_a;
-            arg->val = INSERTER_USERFUNC(e->sym->value.funcVal->taddress, e->sym->value.funcVal->totallocals,
-                                         e->sym->value.funcVal->totalargs, (char *) e->sym->value.funcVal->name);
+            arg->val = insertUserFunc(e->sym->value.funcVal->taddress, e->sym->value.funcVal->totallocals,
+                                      e->sym->value.funcVal->totalargs, (char *) e->sym->value.funcVal->name);
             break;
-        }
-        case libraryfunc_e: {
+        case libraryfunc_e:
             arg->type = libfunc_a;
-            arg->val = INSERTER_LIBFUNC((char *) e->sym->value.funcVal->name);
+            arg->val = insertLibraryDunc((char *) e->sym->value.funcVal->name);
             break;
-        }
-        default:
-            assert(0);
+        default: assert(0);
     }
-}
-
-void make_numberOperand(struct VmArg *arg, double val) {
-    arg->val = INSERTER_NUM(val);
-    arg->type = number_a;
-}
-
-void make_boolOperand(struct VmArg *arg, unsigned int val) {
-    arg->val = val;
-    arg->type = bool_a;
 }
 
 static void make_retvalOperand(struct VmArg *arg) {

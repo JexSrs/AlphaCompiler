@@ -2,11 +2,6 @@
 
 struct FuncStack *functionStackTarget = NULL;
 
-
-static int isFuncStackTargetEmpty() {
-    return functionStackTarget == NULL;
-}
-
 void pushFuncStackTarget(struct SymbolTable *mem) {
     struct FuncStack *new = malloc(sizeof(struct FuncStack));
     new->info = mem;
@@ -20,7 +15,7 @@ void pushFuncStackTarget(struct SymbolTable *mem) {
 }
 
 struct SymbolTable *popFuncStackTarget() {
-    if(isFuncStackTargetEmpty())
+    if(functionStackTarget == NULL)
         return NULL;
 
     // Get item
@@ -38,7 +33,7 @@ struct SymbolTable *popFuncStackTarget() {
 }
 
 struct SymbolTable *topFuncStackTarget() {
-    if(isFuncStackTargetEmpty())
+    if(functionStackTarget == NULL)
         return NULL;
 
     return functionStackTarget->info;
@@ -49,13 +44,14 @@ void appendFuncStackTarget(struct SymbolTable *f, unsigned int instrLabel) {
     new->instrLabel = instrLabel;
     new->next = NULL;
 
-    if(f->value.funcVal->returnList == NULL)
+    if(f->value.funcVal->returnList == NULL) {
         f->value.funcVal->returnList = new;
-    else {
-        struct ReturnList *tmp = f->value.funcVal->returnList;
-        while (tmp->next != NULL)
-            tmp = tmp->next;
-
-        tmp->next = new;
+        return;
     }
+
+    struct ReturnList *tmp = f->value.funcVal->returnList;
+    while (tmp->next != NULL)
+        tmp = tmp->next;
+
+    tmp->next = new;
 }

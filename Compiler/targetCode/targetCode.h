@@ -33,13 +33,13 @@ enum Typer {
 };
 
 enum VmOpcode {
-    assign_v,		add_v,				sub_v,
-    mul_v,			div_v,				mod_v,
-    jump_v,			jeq_v,				jne_v,
-    jle_v,			jge_v,				jlt_v,
-    jgt_v,			call_v,				pusharg_v,
-    funcenter_v,	funcexit_v,			newtable_v,
-    tablegetelem_v,	tablesetelem_v, 	nop_v
+    assign_v, add_v, sub_v,
+    mul_v, div_v, mod_v,
+    jump_v, jeq_v, jne_v,
+    jle_v, jge_v, jlt_v,
+    jgt_v, call_v, pusharg_v,
+    funcenter_v, funcexit_v, newtable_v,
+    tablegetelem_v, tablesetelem_v, nop_v
 };
 
 enum VmArg_t {
@@ -74,7 +74,7 @@ struct Instruction {
 struct UserFunc {
     unsigned int address;
     unsigned int localSize;
-    unsigned int totalargs;
+    unsigned int totalArgs;
     char *id;
 };
 
@@ -101,17 +101,14 @@ extern unsigned int totalUserFuncs;
 extern struct Instruction *instructions;
 extern unsigned int totalInstructions;
 
-int INSERTER_NUM(double val);
-int INSERTER_STRING(char* val);
-int INSERTER_LIBFUNC(char* val);
-int INSERTER_USERFUNC(unsigned int address, unsigned int localSize, unsigned int totalargs, char* id);
+int insertNumber(double val);
+int insertString(char* val);
+int insertLibraryDunc(char* val);
+int insertUserFunc(unsigned int address, unsigned int localSize, unsigned int totalargs, char* id);
 
 int emitInstr(struct Instruction t);
 
 // operands.c
-void make_numberOperand(struct VmArg *arg, double val);
-void make_boolOperand(struct VmArg *arg, unsigned int val);
-
 void generateTcode(unsigned int totalQuads);
 unsigned int nextInstructionLabel(void);
 

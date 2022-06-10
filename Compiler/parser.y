@@ -1561,6 +1561,7 @@ void printAllQuads() {
 }
 
 void print(char *message) {
+	return;
 	printf("Message (line %d): %s\n", getCurrentLine(), message);
 }
 

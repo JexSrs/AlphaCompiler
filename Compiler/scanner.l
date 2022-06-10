@@ -95,7 +95,7 @@
 						return STRING;
 					}
 [\"][^"]* { printf("Non closing string at line: %d\n", line_number_glb); }
-[ \t]* /* ignores whitespaces */;
+[ \t]*      /* ignores whitespaces */;
 
 .	{ printf("Invalid type '%s' in line: %d\n", yytext, line_number_glb); }
 
